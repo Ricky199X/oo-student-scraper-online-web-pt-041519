@@ -49,10 +49,35 @@ class Scraper
   def self.scrape_profile_page(profile_url)
     #scrapes individual student profiles to 
     # get more information 
-    profile = Nokogiri::HTML((profile_url))
-    binding.pry
 
-    
+    site_html = profile_url
+    page = open(site_html)
+    profile = Nokogiri::HTML(page)
+
+    social_media_hash = {}
+    # social links exist in "div social-icon-container"
+    # social links : profile.css("a").attribute("href").value
+    # social_media_hash[:blog] = profile.css("div social-icon-container")
+
+    profile.css("div.social-icon-container a").each do |href|
+      link = href.attribute("href").value
+      # set up regex to assign each social link to a variable, make it a key of the hash
+      if link.match(/.twitter.com/)
+        social_media_hash[:twitter] = link
+      elsif link.match(/.linkedin.com/)
+        social_media_hash[:linkedin] = link
+      elsif link.match(/.github.com/)
+        social_media_hash[:github] = link
+      else
+        social_media_hash[:blog] = link
+      end
+
+      social_media_hash[:profile_quote] = profile.css("div.profile-quote").text
+      social_media_hash[:bio] = profile.css("p").text
+      
+    end
+      # return the social_media_hash
+    social_media_hash
   end
 
 end
